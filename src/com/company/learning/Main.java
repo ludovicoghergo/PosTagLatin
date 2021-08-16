@@ -49,7 +49,7 @@ public class Main {
             }
 
             //calcolo numeratore
-            if(triple.tag.equals("inizioFrase") || triple.tag.equals("fineFrase")){
+            if(triple.tag.equals("inizioFrase")){
                 precTag = triple.getTag();
             }else{
                 if (numeratore.keySet().contains(triple.getTag())){
@@ -73,7 +73,7 @@ public class Main {
         HashMap<String, Double> probabilita = new HashMap<>();
         Double prob = new Double(0);
        for (String tag: numeratore.keySet()){
-           for (String tag2: numeratore.keySet()){
+           for (String tag2: denominatore.keySet()){
                try{
                   prob= new Double((double) numeratore.get(tag).get(tag2)/(double) denominatore.get(tag2));
                }catch (Exception e){}
