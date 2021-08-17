@@ -58,8 +58,8 @@ public class Main {
         //inizio viterbi
         int N= frase.size()+2;
         int T=tagList.size();
-        Double[][] matrix = new Double[N+2][T];
-        Integer[][] pointer = new Integer[N+2][T];
+        Double[][] matrix = new Double[T][N+2];
+        Integer[][] pointer = new Integer[T][N+2];
 
         //step di inizializzazione
         for (int i=0; i<=N; i++){
@@ -72,10 +72,39 @@ public class Main {
                 a0s = new Double(probabilita.get(tagList.get(i) + " - "+ "inizioFrase"));
             }catch (Exception e){}
 
-            matrix[i][0] = a0s * bso1;
-            pointer[i][0] = -1; // abbiamo messo -1 e non 0 perchè 0 è un tag, mentre qua indichiamo inizio frase
+            matrix[0][i] = a0s * bso1;
+            pointer[0][i] = -1; // abbiamo messo -1 e non 0 perchè 0 è un tag, mentre qua indichiamo inizio frase
 
         }
+        //recursion step
+        for (int t=1; t<=T; t++){
+            for (int s=0; s<=N; s++){
+                Double max = new Double(0);
+                Integer maxPointer = new Integer(-1);
+
+                for (int i=0; i<=N; i++){
+                    Double a = new Double(0);
+                    Double b = new Double(0);
+                    Double viterbi = new Double(0);
+                    Double ris;
+                    try{
+                        b = new Double(probabilitaW.get(frase.get(t)+ " - "+ tagList.get(s) ));
+                    }catch (Exception e){}
+                    try{
+                        a = new Double(probabilita.get(tagList.get(s) + " - "+ tagList.get(i)));
+                    }catch (Exception e){}
+                    viterbi = new Double(matrix[t-1][i]);
+                    ris = new Double(viterbi*a*b);
+                    if(max<ris){
+                        max = ris;
+                        maxPointer = i;
+                    }
+                }
+                matrix[t][s]=max;
+                pointer[t][s]=maxPointer;
+            }
+        }
+
         System.out.println("fatto");
 
     }
