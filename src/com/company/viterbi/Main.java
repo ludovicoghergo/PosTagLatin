@@ -78,7 +78,9 @@ public class Main {
 
         }
         //recursion step
+        String ssss= "";
         for (int t=1; t<nFrase; t++){
+            System.out.println(ssss);
             for (int s=0; s<nTag; s++){
                 Double max = new Double(0);
                 Integer maxPointer = new Integer(-1);
@@ -99,10 +101,29 @@ public class Main {
                     if(max<ris){
                         max = ris;
                         maxPointer = i;
+                        System.out.println(ssss);
                     }
                 }
-                matrix[s][t]=max;
-                pointer[s][t]=maxPointer;
+                matrix[s][t]=max;  // valore
+                pointer[s][t]=maxPointer;  // puntatore
+            }
+        }
+
+        //termination step
+        Double max = new Double(0);
+        Integer maxPointer = new Integer(-1);
+        for (int i=0; i<nTag; i++){
+            Double a = new Double(0);
+            Double viterbi = new Double(0);
+            Double ris;
+            try{
+                a = new Double(probabilita.get("fineFrase" + " - "+ tagList.get(i)));
+            }catch (Exception e){}
+            viterbi = new Double(matrix[i][nFrase]);
+            ris = new Double(viterbi*a);
+            if(max<ris){
+                max = ris;
+                maxPointer = i;
             }
         }
 
