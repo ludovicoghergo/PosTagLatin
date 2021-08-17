@@ -7,11 +7,14 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class Main {
     public static void main(String[] args) {
         ArrayList<String> tagList = new ArrayList<>();
+        ArrayList<String> wordList = new ArrayList<>();
         HashMap<String, Double> probabilita = new HashMap<>();
         try (BufferedReader br = new BufferedReader(new FileReader("D:\\Games\\PosTagLatin\\output.txt"))) {
             String line;
@@ -35,6 +38,9 @@ public class Main {
             while ((line = br.readLine()) != null) {
                 String[] linea = line.split("\t");
                 probabilitaW.put(linea[0], new Double(Double.parseDouble(linea[1])));
+                if (!wordList.contains(linea[0].split(" - ")[0])){
+                    wordList.add(linea[0].split(" - ")[0]);
+                }
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -57,7 +63,7 @@ public class Main {
 
         //inizio viterbi
         int nTag= tagList.size();
-        int nFrase= frase.size()+2;
+        int nFrase= frase.size();
         //prima righe poi colonne
         Double[][] matrix = new Double[nTag][nFrase];
         Integer[][] pointer = new Integer[nTag][nFrase];
@@ -78,9 +84,7 @@ public class Main {
 
         }
         //recursion step
-        String ssss= "";
         for (int t=1; t<nFrase; t++){
-            System.out.println(ssss);
             for (int s=0; s<nTag; s++){
                 Double max = new Double(0);
                 Integer maxPointer = new Integer(-1);
@@ -92,7 +96,12 @@ public class Main {
                     Double ris;
                     try{
                         b = new Double(probabilitaW.get(frase.get(t)+ " - "+ tagList.get(s) ));
-                    }catch (Exception e){}
+                    }catch (Exception e){
+                        //la parole è sconosciuta, bisogna fare smoothing
+                        if (!wordList.contains(frase.get(t))){
+                            b = 1.0;
+                        }
+                    }
                     try{
                         a = new Double(probabilita.get(tagList.get(s) + " - "+ tagList.get(i)));
                     }catch (Exception e){}
@@ -101,7 +110,8 @@ public class Main {
                     if(max<ris){
                         max = ris;
                         maxPointer = i;
-                        System.out.println(ssss);
+                        //System.out.println("ho trovato un max alla colonna="+ t+ " . Il tag è="+ tagList.get(i));
+
                     }
                 }
                 matrix[s][t]=max;  // valore
@@ -119,7 +129,7 @@ public class Main {
             try{
                 a = new Double(probabilita.get("fineFrase" + " - "+ tagList.get(i)));
             }catch (Exception e){}
-            viterbi = new Double(matrix[i][nFrase]);
+            viterbi = new Double(matrix[i][nFrase-1]);
             ris = new Double(viterbi*a);
             if(max<ris){
                 max = ris;
@@ -127,7 +137,22 @@ public class Main {
             }
         }
 
-        System.out.println("fatto");
+        System.out.println("fatto viterbi");
+
+        //calcolo "return" di viterbi
+        ArrayList<String> result = new ArrayList<>();
+        result.add(tagList.get(maxPointer));
+        int prec = pointer[maxPointer][nFrase-1];
+        result.add(tagList.get(prec));
+        for(int i=nFrase-2; i>0; i--){
+            result.add(tagList.get(pointer[prec][i]));
+            prec = pointer[prec][i];
+        }
+        System.out.println("fatto return");
+        for (int i =0; i<nFrase; i++){
+            System.out.println(frase.get(i)+" - "+result.get(nFrase-1-i));
+        }
+
 
     }
 
