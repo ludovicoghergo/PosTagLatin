@@ -15,7 +15,7 @@ public class Main {
             list.add(triple2);
             while ((line = br.readLine()) != null) {
                 if(line.length()!=0){
-                    if (line.charAt(0)!='#' && line.charAt(0)!='1'){
+                    if (line.charAt(0)!='#'){
                         String[] tagger = line.split("\t");
                         Triple triple = new Triple(tagger[1],tagger[2],tagger[3]);
                         list.add(triple);

@@ -1,7 +1,5 @@
 package com.company.viterbi;
 
-import com.company.learning.Triple;
-
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -11,11 +9,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 
-public class Main {
-    public static void main(String[] args) {
-        ArrayList<String> tagList = new ArrayList<>();
-        ArrayList<String> wordList = new ArrayList<>();
-        HashMap<String, Double> probabilita = new HashMap<>();
+public class Viterbi {
+    ArrayList<String> tagList = new ArrayList<>();
+    ArrayList<String> wordList = new ArrayList<>();
+    HashMap<String, Double> probabilitaW = new HashMap<>();
+    HashMap<String, Double> probabilita = new HashMap<>();
+
+    public Viterbi(){
         try (BufferedReader br = new BufferedReader(new FileReader("D:\\Games\\PosTagLatin\\output.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -32,7 +32,6 @@ public class Main {
             e.printStackTrace();
         }
         System.out.println("output letto");
-        HashMap<String, Double> probabilitaW = new HashMap<>();
         try (BufferedReader br = new BufferedReader(new FileReader("D:\\Games\\PosTagLatin\\outputW.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -48,20 +47,9 @@ public class Main {
             e.printStackTrace();
         }
         System.out.println("outputW letto");
+    }
 
-        ArrayList<String> frase = new ArrayList<>();
-        frase.add("In");        frase.add("Dei");
-        frase.add("omnipotentis");        frase.add("nomine");
-        frase.add(",");        frase.add("regnante");
-        frase.add("domno");        frase.add("nostro");
-        frase.add("Karolus");        frase.add("divina");
-        frase.add("faventem");        frase.add("clementia");
-        frase.add("imperatore");        frase.add("augusto");
-        frase.add(",");frase.add("anno");frase.add("imperii");frase.add("eius");frase.add("septimo");frase.add(",");
-        frase.add("pridie");frase.add("idus");frase.add("augusti");frase.add("indictione");frase.add("quinta");frase.add(".");
-
-
-        //inizio viterbi
+    public ArrayList<String> viterbi (ArrayList<String> frase){
         int nTag= tagList.size();
         int nFrase= frase.size();
         //prima righe poi colonne
@@ -98,7 +86,7 @@ public class Main {
                         b = new Double(probabilitaW.get(frase.get(t)+ " - "+ tagList.get(s) ));
                     }catch (Exception e){
                         //la parole è sconosciuta, bisogna fare smoothing
-                        if (!wordList.contains(frase.get(t))){
+                        if (!wordList.contains(frase.get(t))  && tagList.get(s).equals("NOUN")){
                             b = 1.0;
                         }
                     }
@@ -131,13 +119,13 @@ public class Main {
             }catch (Exception e){}
             viterbi = new Double(matrix[i][nFrase-1]);
             ris = new Double(viterbi*a);
-            if(max<ris){
+            if(max<=ris){
                 max = ris;
                 maxPointer = i;
             }
         }
 
-        System.out.println("fatto viterbi");
+        //System.out.println("fatto viterbi");
 
         //calcolo "return" di viterbi
         ArrayList<String> result = new ArrayList<>();
@@ -148,14 +136,7 @@ public class Main {
             result.add(tagList.get(pointer[prec][i]));
             prec = pointer[prec][i];
         }
-        System.out.println("fatto return");
-        for (int i =0; i<nFrase; i++){
-            System.out.println(frase.get(i)+" - "+result.get(nFrase-1-i));
-        }
-
-
+        Collections.reverse(result);
+        return result;
     }
-
-
-
 }
