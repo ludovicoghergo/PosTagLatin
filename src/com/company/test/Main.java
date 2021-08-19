@@ -83,7 +83,7 @@ public class Main {
                 //System.out.println("sbagliato= "+frase.get(i)+ " - "+ tag.get(i) + " - "+ result.get(i));
             }
         }
-        //System.out.println("corretti= "+corretti+" - sbagliati= "+sbagliati);
+        System.out.println("corretti= "+corretti+" - sbagliati= "+sbagliati);
         ris.add(corretti);
         ris.add(sbagliati);
         return ris;
