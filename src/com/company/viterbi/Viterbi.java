@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 
 public class Viterbi {
+
     ArrayList<String> tagList = new ArrayList<>();
     ArrayList<String> wordList = new ArrayList<>();
     HashMap<String, Double> probabilitaW = new HashMap<>();
@@ -19,12 +20,12 @@ public class Viterbi {
         try (BufferedReader br = new BufferedReader(new FileReader("D:\\Games\\PosTagLatin\\output.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
-
                 String[] linea = line.split("\t");
                 probabilita.put(linea[0], new Double(Double.parseDouble(linea[1])));
                 if(!tagList.contains(linea[0].split(" - ")[0])){
                     tagList.add(linea[0].split(" - ")[0]);
                 }
+
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -87,10 +88,15 @@ public class Viterbi {
                     try{
                         b = new Double(probabilitaW.get(frase.get(t)+ " - "+ tagList.get(s) ));
                     }catch (Exception e){
-                        //la parole è sconosciuta, bisogna fare smoothing
-                        if (!wordList.contains(frase.get(t))  && (tagList.get(s).equals("NOUN") || tagList.get(s).equals("VERB"))){
-                            b = 0.5;
-                        }
+                        // la parole è sconosciuta, bisogna fare smoothing
+                        //sempre nomi, verbi
+                        if (!wordList.contains(frase.get(t))  && (tagList.get(s).equals("NOUN") || tagList.get(s).equals("VERB"))){b = 0.5;}
+
+                        // sempre nomi
+                        //if (!wordList.contains(frase.get(t))  && tagList.get(s).equals("NOUN"))){b = 0.5;}
+
+                        // 1/#(pos_tags)
+                        //if (!wordList.contains(frase.get(t)) ){ b= (double) 1/16;}
                     }
                     try{
                         a = new Double(probabilita.get(tagList.get(s) + " - "+ tagList.get(i)));
