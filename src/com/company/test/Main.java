@@ -49,16 +49,17 @@ public class Main {
         for (Triple tripla: list){
             if( tripla.getTag().equals("inizioFrase")){}
             else if (tripla.getTag().equals("fineFrase")){
-                if(frase.size()!=0){
-                    System.out.println("frase n= "+ nFrase+" : ");
-                    result = viterbi.viterbi(frase);
-                    ArrayList<Integer> ris =check(tag, result, frase);
-                    totGiusti += ris.get(0);
-                    totSbaglaiti += ris.get(1);
-                    frase.clear();
-                    tag.clear();
-                    nFrase++;
-                }
+                    if(frase.size()!=0){
+                            System.out.println("frase n= "+ nFrase+" : ");
+                            result = viterbi.viterbi(frase);
+                            ArrayList<Integer> ris =check(tag, result, frase);
+                            totGiusti += ris.get(0);
+                            totSbaglaiti += ris.get(1);
+                        frase.clear();
+                        tag.clear();
+                        nFrase++;
+                    }
+
             }else{
                 frase.add(tripla.getWord());
                 tag.add(tripla.getTag());

@@ -90,13 +90,13 @@ public class Viterbi {
                     }catch (Exception e){
                         // la parole è sconosciuta, bisogna fare smoothing
                         //sempre nomi, verbi
-                        if (!wordList.contains(frase.get(t))  && (tagList.get(s).equals("NOUN") || tagList.get(s).equals("VERB"))){b = 0.5;}
+                        //if (!wordList.contains(frase.get(t))  && (tagList.get(s).equals("NOUN") || tagList.get(s).equals("VERB"))){b = 0.5;}
 
                         // sempre nomi
                         //if (!wordList.contains(frase.get(t))  && tagList.get(s).equals("NOUN"))){b = 0.5;}
 
                         // 1/#(pos_tags)
-                        //if (!wordList.contains(frase.get(t)) ){ b= (double) 1/16;}
+                        if (!wordList.contains(frase.get(t)) ){ b= (double) 1/16;}
                     }
                     try{
                         a = new Double(probabilita.get(tagList.get(s) + " - "+ tagList.get(i)));
@@ -152,7 +152,13 @@ public class Viterbi {
                 a = new Double(probabilita.get("fineFrase" + " - "+ tagList.get(i)));
             }catch (Exception e){}
             viterbi = new Double(matrix[i][nFrase-1]);
-            ris = new Double(viterbi*a);
+            // dovremo sistemarlo con i logaritmi
+            // ris = new Double(viterbi*a);
+            if( viterbi==0 || a==0){
+                ris=0.0;
+            }else{
+                ris = new Double(Math.max(viterbi*a, Double.MIN_VALUE));
+            }
             if(max<=ris){
                 max = ris;
                 maxPointer = i;
