@@ -50,6 +50,7 @@ public class Viterbi {
     }
 
     public ArrayList<String> viterbi (ArrayList<String> frase){
+
         int nTag= tagList.size();
         int nFrase= frase.size();
         //prima righe poi colonne
@@ -73,6 +74,7 @@ public class Viterbi {
         }
         //recursion step
         for (int t=1; t<nFrase; t++){
+            Boolean trovato = false;
             for (int s=0; s<nTag; s++){
                 Double max = new Double(0);
                 Integer maxPointer = new Integer(-1);
@@ -86,8 +88,8 @@ public class Viterbi {
                         b = new Double(probabilitaW.get(frase.get(t)+ " - "+ tagList.get(s) ));
                     }catch (Exception e){
                         //la parole è sconosciuta, bisogna fare smoothing
-                        if (!wordList.contains(frase.get(t))  && tagList.get(s).equals("NOUN")){
-                            b = 1.0;
+                        if (!wordList.contains(frase.get(t))  && (tagList.get(s).equals("NOUN") || tagList.get(s).equals("VERB"))){
+                            b = 0.5;
                         }
                     }
                     try{
@@ -96,15 +98,41 @@ public class Viterbi {
                     viterbi = new Double(matrix[i][t-1]);
                     ris = new Double(viterbi*a*b);
                     if(max<ris){
+                        trovato =true;
                         max = ris;
                         maxPointer = i;
                         //System.out.println("ho trovato un max alla colonna="+ t+ " . Il tag è="+ tagList.get(i));
-
                     }
                 }
                 matrix[s][t]=max;  // valore
                 pointer[s][t]=maxPointer;  // puntatore
             }
+            //se la colonna è tutta 0, metto la prob di emissione massima e puntatore a il massimo della colonna precedente.
+            if(!trovato){
+                Double max=0.0;
+                Integer pointerMax =0;
+                Double b = 0.0;
+                for (int s=0; s<nTag; s++) {
+                    try{
+                        b = new Double(probabilitaW.get(frase.get(t)+ " - "+ tagList.get(s) ));
+                    }catch (Exception e){ }
+                    if (b>max){
+                        max=b;
+                        pointerMax=s;
+                    }
+                }
+                matrix[pointerMax][t]=max;
+                Double maxPrec=0.0;
+                Integer pointerMaxPrec =0;
+                for (int s=0; s<nTag; s++){
+                    if(maxPrec<matrix[s][t-1]){
+                        maxPrec=matrix[s][t-1];
+                        pointerMaxPrec=s;
+                    }
+                }
+                pointer[pointerMax][t]=pointerMaxPrec;
+            }
+
         }
 
         //termination step

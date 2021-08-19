@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class Main {
+
     public static void main(String[] args) {
         ArrayList<Triple> list = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader("D:\\Games\\PosTagLatin\\src\\com\\company\\corpus\\la_llct-ud-test.conllu"))) {
@@ -43,30 +44,35 @@ public class Main {
         ArrayList<String> frase = new ArrayList<>();
         ArrayList<String> tag = new ArrayList<>();
         ArrayList<String> result = new ArrayList<>();
+        int totGiusti=0;
+        int totSbaglaiti=0;
         for (Triple tripla: list){
             if( tripla.getTag().equals("inizioFrase")){}
             else if (tripla.getTag().equals("fineFrase")){
-                if(nFrase==30){
-                    System.out.println("abc");
+                if(frase.size()!=0){
+                    System.out.println("frase n= "+ nFrase+" : ");
+                    result = viterbi.viterbi(frase);
+                    ArrayList<Integer> ris =check(tag, result, frase);
+                    totGiusti += ris.get(0);
+                    totSbaglaiti += ris.get(1);
+                    frase.clear();
+                    tag.clear();
+                    nFrase++;
                 }
-                System.out.print("frase n= "+ nFrase+" : ");
-                result = viterbi.viterbi(frase);
-                check(tag, result, frase);
-                frase.clear();
-                tag.clear();
-                nFrase++;
-
             }else{
                 frase.add(tripla.getWord());
                 tag.add(tripla.getTag());
             }
 
         }
+        System.out.println("giusti="+totGiusti+" - sbagliati="+totSbaglaiti);
+
     }
 
-    private static void check(ArrayList<String> tag, ArrayList<String> result, ArrayList<String> frase) {
+    private static ArrayList<Integer> check(ArrayList<String> tag, ArrayList<String> result, ArrayList<String> frase) {
         int corretti = 0;
         int sbagliati = 0;
+        ArrayList<Integer> ris= new ArrayList<>();
         for (int i=0; i<tag.size(); i++){
             if(tag.get(i).equals(result.get(i))){
                 corretti++;
@@ -76,7 +82,10 @@ public class Main {
                 //System.out.println("sbagliato= "+frase.get(i)+ " - "+ tag.get(i) + " - "+ result.get(i));
             }
         }
-        System.out.println("corretti= "+corretti+" - sbagliati= "+sbagliati);
+        //System.out.println("corretti= "+corretti+" - sbagliati= "+sbagliati);
+        ris.add(corretti);
+        ris.add(sbagliati);
+        return ris;
 
     }
 }

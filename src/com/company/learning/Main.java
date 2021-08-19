@@ -4,6 +4,7 @@ package com.company.learning;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 public class Main {
 
@@ -16,8 +17,9 @@ public class Main {
             while ((line = br.readLine()) != null) {
                 if(line.length()!=0){
                     if (line.charAt(0)!='#'){
+                        Triple triple;
                         String[] tagger = line.split("\t");
-                        Triple triple = new Triple(tagger[1],tagger[2],tagger[3]);
+                        triple = new Triple(tagger[1],tagger[2],tagger[3]);
                         list.add(triple);
                     }
                 }else{
