@@ -10,7 +10,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         ArrayList<Triple> list = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("D:\\Games\\PosTagLatin\\src\\com\\company\\corpus\\la_llct-ud-train.conllu"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("/home/ludov/Documents/PosTagLatin/src/com/company/learning/la_llct-ud-train.conllu.txt"))) {
             String line;
             Triple triple2 = new Triple("inizioFrase","inizioFrase","inizioFrase");
             list.add(triple2);
@@ -35,7 +35,7 @@ public class Main {
             e.printStackTrace();
         }
 
-        // calcolo probabilità pos-->pos
+
         HashMap<String, HashMap<String, Integer>> numeratore = new HashMap<>();
         HashMap <String, Integer> denominatore = new HashMap<>();
         String precTag = "inizioFrase";
@@ -70,7 +70,64 @@ public class Main {
                 }
                 precTag = triple.getTag();
             }
+        }
+
+
+
+
+
+
+
+        //PROVA LUDO
+
+
+        // calcolo probabilità pos-->pos
+        HashMap<String, HashMap<String, Integer>> suffix_tag_map = new HashMap<>();
+        HashMap <String, Integer> suffix_cnt = new HashMap<>();
+        String precTag2 = "inizioFrase";
+
+        for(Triple triple: list) {
+            //calcolo denominatore
+            if (!triple.tag.equals("inizioFrase") && !triple.tag.equals("fineFrase")) {
+                var word = triple.getWord();
+                int j = 0;
+                for (int i = word.length() - 1; i >= 0 && j < 4; i--,j++) {
+                    // CALCOLO NUMERO VOLTE CHE SI VERIFICA UN SUFFISSO
+                    if (suffix_cnt.keySet().contains(word.substring(i))) {
+                        Integer appoggio = suffix_cnt.get(word.substring(i));
+                        suffix_cnt.remove(word.substring(i));
+                        suffix_cnt.put(word.substring(i), appoggio + 1);
+                    } else {
+                        suffix_cnt.put(word.substring(i), 1);
+                    }
+
+                    //CALCOLO NUMERO RELAZIONI TAG-SUFFISSO
+                    /* FORMATO  HASHMAP ->
+                     *   <STRING : SUFFISSO> ->  <STRING : TAG> -> <INT : COUNTER>
+                     *
+                     */
+                    if (suffix_tag_map.keySet().contains(word.substring(i))) {
+                        if (suffix_tag_map.get(word.substring(i)).keySet().contains(triple.getTag())) {
+                            int value = suffix_tag_map.get(word.substring(i)).get(triple.getTag());
+                            HashMap app = suffix_tag_map.get(word.substring(i));
+                            app.remove(triple.getTag());
+                            app.put(triple.getTag(), value + 1);
+                        } else {
+                            suffix_tag_map.get(word.substring(i)).put(triple.getTag(), 1);
+                        }
+                    } else {
+                        HashMap<String, Integer> app = new HashMap<>();
+                        app.put(triple.getTag(), 1);
+                        suffix_tag_map.put(word.substring(i), app);
+                    }
+
+
+                }
             }
+        }
+
+
+        //FINE PROVA LUD
         //calcolo probabilità
         HashMap<String, Double> probabilita = new HashMap<>();
         Double prob = new Double(0);
