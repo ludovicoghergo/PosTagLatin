@@ -13,7 +13,7 @@ public class Main {
 
     public static void main(String[] args) {
         ArrayList<Triple> list = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("D:\\Games\\PosTagLatin\\src\\com\\company\\corpus\\la_llct-ud-test.conllu"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("/home/ludov/Documents/PosTagLatin/src/com/company/corpus/la_llct-ud-test.conllu"))) {
             String line;
             Triple triple2 = new Triple("inizioFrase","inizioFrase","inizioFrase");
             list.add(triple2);
