@@ -10,7 +10,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         ArrayList<Triple> list = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("/home/ludov/Documents/PosTagLatin/src/com/company/learning/la_llct-ud-train.conllu.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("/home/ludov/Documents/PosTagLatin/src/com/company/corpus/la_llct-ud-dev.conllu"))) {
             String line;
             Triple triple2 = new Triple("inizioFrase","inizioFrase","inizioFrase");
             list.add(triple2);
@@ -126,6 +126,25 @@ public class Main {
             }
         }
 
+        FileWriter f0 = new FileWriter("suff_tag.txt");
+        String newLine = System.getProperty("line.separator");
+        for(String key: suffix_tag_map.keySet())
+        {
+            for (String key_val: suffix_tag_map.get(key).keySet()){
+                f0.write(key + "\t" + key_val+ "\t"+suffix_tag_map.get(key).get(key_val) + newLine);
+            }
+
+        }
+        f0.close();
+
+        FileWriter f_print = new FileWriter("suff_cnt.txt");
+        for(String key: suffix_cnt.keySet())
+        {
+                f_print.write(key + "\t" +suffix_cnt.get(key) + newLine);
+        }
+        f0.close();
+
+
 
         //FINE PROVA LUD
         //calcolo probabilità
@@ -141,13 +160,13 @@ public class Main {
            }
 
        }
-        FileWriter f0 = new FileWriter("output.txt");
-        String newLine = System.getProperty("line.separator");
+        FileWriter f4 = new FileWriter("output.txt");
+        String newLine1 = System.getProperty("line.separator");
         for(String key: probabilita.keySet())
         {
-            f0.write(key + "\t" +probabilita.get(key)+ newLine);
+            f4.write(key + "\t" +probabilita.get(key)+ newLine1);
         }
-        f0.close();
+        f4.close();
         System.out.println("fine probabilità");
 
         //calcolo Pos --> Word

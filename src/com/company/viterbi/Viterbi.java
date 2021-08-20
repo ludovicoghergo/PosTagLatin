@@ -15,10 +15,42 @@ public class Viterbi {
     ArrayList<String> wordList = new ArrayList<>();
     HashMap<String, Double> probabilitaW = new HashMap<>();
     HashMap<String, Double> probabilita = new HashMap<>();
+    HashMap<String, Double> suff_cnt = new HashMap<>();
+    HashMap<String, Double> suff_tag = new HashMap<>();
     HashMap<String, Double> smoothing = new HashMap<>();
 
     public Viterbi() {
-        try (BufferedReader br = new BufferedReader(new FileReader("D:\\Games\\PosTagLatin\\output.txt"))) {
+        //TEST SUFF
+
+        //suff_cnt
+        try (BufferedReader br = new BufferedReader(new FileReader("/home/ludov/Documents/PosTagLatin/suff_cnt.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] linea = line.split("\t");
+                suff_cnt.put(linea[0], new Double(Double.parseDouble(linea[1])));
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //suff_tag.txt
+
+        try (BufferedReader br = new BufferedReader(new FileReader("/home/ludov/Documents/PosTagLatin/suff_tag.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] linea = line.split("\t");
+                suff_tag.put(linea[0]+" "+linea[1], new Double(Double.parseDouble(linea[2])));
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // FINE TEST SUFF
+        try (BufferedReader br = new BufferedReader(new FileReader("/home/ludov/Documents/PosTagLatin/output.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] linea = line.split("\t");
@@ -33,8 +65,9 @@ public class Viterbi {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         System.out.println("output letto");
-        try (BufferedReader br = new BufferedReader(new FileReader("D:\\Games\\PosTagLatin\\outputW.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("/home/ludov/Documents/PosTagLatin/outputW.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] linea = line.split("\t");
@@ -50,7 +83,7 @@ public class Viterbi {
         }
         System.out.println("outputW letto");
 
-        try (BufferedReader br = new BufferedReader(new FileReader("D:\\Games\\PosTagLatin\\devSmoothing.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("/home/ludov/Documents/PosTagLatin/devSmoothing.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] linea = line.split("\t");
@@ -116,6 +149,7 @@ public class Viterbi {
                         //if (!wordList.contains(frase.get(t)) ){ b= (double) 1/16;}
 
                         //dev set single word
+                        /*
                         if (!wordList.contains(frase.get(t))) {
                             if (tagList.get(s).equals("fineFrase")) {
                                 b = 0.0;
@@ -123,6 +157,38 @@ public class Viterbi {
                                 b = smoothing.get(tagList.get(s));
                             }
                         }
+                         */
+
+                        // suffix-test
+                        if (!wordList.contains(frase.get(t))) {
+                            if (tagList.get(s).equals("fineFrase")) {
+                                b = 0.0;
+                            } else {
+                                int jj = 0;
+                                double risWord = 0;
+                                for (int kk = frase.get(t).length() - 1; kk >= 0 && jj < 4; kk--,jj++){
+                                    double nominatore = 0.0;
+                                    double denominatore= 0.0;
+                                    try {
+                                        nominatore= suff_tag.get(frase.get(t).substring(kk)+" "+tagList.get(s));
+                                        String sab = frase.get(t).substring(kk);
+                                        String pur = tagList.get(s);
+                                        if(nominatore>0){
+                                            System.out.println("final");
+                                        }
+                                    } catch (Exception u) {}
+                                    try {
+                                        denominatore= suff_cnt.get(frase.get(t).substring(kk));
+                                    } catch (Exception u) {}
+
+                                    risWord += 0.25 * (nominatore/denominatore);
+                                }
+                                b = risWord;
+
+                            }
+                        }
+
+
                     }
                     try {
                         a = new Double(probabilita.get(tagList.get(s) + " - " + tagList.get(i)));
