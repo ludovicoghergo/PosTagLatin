@@ -18,9 +18,43 @@ public class Viterbi {
     HashMap<String, Double> suff_cnt = new HashMap<>();
     HashMap<String, Double> suff_tag = new HashMap<>();
     HashMap<String, Double> smoothing = new HashMap<>();
+    HashMap<String, Double> tag_freq = new HashMap<>();
+
+
+    public double interpolateProb(String word,String tag, int cnt, double val){
+        if(cnt < 1 ||word.length()-1-4+cnt < 0 ) {
+            return val;
+        }
+
+        String cut_word = word.substring(word.length()-1-4+cnt);
+        double nom = 0;
+        double denom =1;
+        try {
+            nom = suff_tag.get(cut_word + " " + tag);
+        }catch (Exception e){}
+        try{
+            denom = tag_freq.get(tag);
+        }catch (Exception e){}
+        double prob_mle = Math.max(val,nom/denom);
+        return interpolateProb(word,tag,cnt-1, prob_mle);
+    }
 
     public Viterbi() {
         //TEST SUFF
+
+        //tag_count
+
+        try (BufferedReader br = new BufferedReader(new FileReader("/home/ludov/Documents/PosTagLatin/tag_freq.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] linea = line.split("\t");
+                tag_freq.put(linea[0], new Double(Double.parseDouble(linea[1])));
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         //suff_cnt
         try (BufferedReader br = new BufferedReader(new FileReader("/home/ludov/Documents/PosTagLatin/suff_cnt.txt"))) {
@@ -164,27 +198,7 @@ public class Viterbi {
                             if (tagList.get(s).equals("fineFrase")) {
                                 b = 0.0;
                             } else {
-                                int jj = 0;
-                                double risWord = 0;
-                                for (int kk = frase.get(t).length() - 1; kk >= 0 && jj < 4; kk--,jj++){
-                                    double nominatore = 0.0;
-                                    double denominatore= 0.0;
-                                    try {
-                                        nominatore= suff_tag.get(frase.get(t).substring(kk)+" "+tagList.get(s));
-                                        String sab = frase.get(t).substring(kk);
-                                        String pur = tagList.get(s);
-                                        if(nominatore>0){
-                                            System.out.println("final");
-                                        }
-                                    } catch (Exception u) {}
-                                    try {
-                                        denominatore= suff_cnt.get(frase.get(t).substring(kk));
-                                    } catch (Exception u) {}
-
-                                    risWord += 0.25 * (nominatore/denominatore);
-                                }
-                                b = risWord;
-
+                                b = interpolateProb(frase.get(t),tagList.get(s),4, 0);
                             }
                         }
 

@@ -1,5 +1,6 @@
 package com.company.test;
 
+import com.company.dev.Pair;
 import com.company.learning.Triple;
 import com.company.viterbi.Viterbi;
 
@@ -8,12 +9,15 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Main {
 
     public static void main(String[] args) {
         ArrayList<Triple> list = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("/home/ludov/Documents/PosTagLatin/src/com/company/corpus/la_llct-ud-test.conllu"))) {
+        HashMap<String,Integer> errori= new HashMap<>();
+        ArrayList<String> allTags = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(System.getProperty("user.dir")+"/src/com/company/corpus/la_llct-ud-test.conllu"))) {
             String line;
             Triple triple2 = new Triple("inizioFrase","inizioFrase","inizioFrase");
             list.add(triple2);
@@ -23,6 +27,10 @@ public class Main {
                         String[] tagger = line.split("\t");
                         Triple triple = new Triple(tagger[1],tagger[2],tagger[3]);
                         list.add(triple);
+                        if(!allTags.contains(tagger[3])){
+                            allTags.add(tagger[3]);
+                            errori.put(tagger[3], 0);
+                        }
                     }
                 }else{
                     Triple triple = new Triple("fineFrase","fineFrase","fineFrase");
@@ -49,16 +57,30 @@ public class Main {
         for (Triple tripla: list){
             if( tripla.getTag().equals("inizioFrase")){}
             else if (tripla.getTag().equals("fineFrase")){
-                    if(frase.size()!=0){
-                            System.out.println("frase n= "+ nFrase+" : ");
-                            result = viterbi.viterbi(frase);
-                            ArrayList<Integer> ris =check(tag, result, frase);
-                            totGiusti += ris.get(0);
-                            totSbaglaiti += ris.get(1);
-                        frase.clear();
-                        tag.clear();
-                        nFrase++;
+                if(frase.size()!=0){
+                    System.out.print("frase n= "+ nFrase+" : ");
+                    result = viterbi.viterbi(frase);
+
+                    //conteggio errori
+                    int corretti = 0;
+                    int sbagliati = 0;
+                    for (int i=0; i<tag.size(); i++){
+                        if(tag.get(i).equals(result.get(i))){
+                            corretti++;
+                        }else{
+                            sbagliati++;
+                            int prec = errori.get(tag.get(i));
+                            errori.remove(tag.get(i));
+                            errori.put(tag.get(i), prec+1);
+                        }
                     }
+                    System.out.println("corretti= "+corretti+" - sbagliati= "+sbagliati);
+                    totGiusti += corretti;
+                    totSbaglaiti += sbagliati;
+                    frase.clear();
+                    tag.clear();
+                    nFrase++;
+                }
 
             }else{
                 frase.add(tripla.getWord());
@@ -67,9 +89,11 @@ public class Main {
 
         }
         System.out.println("giusti="+totGiusti+" - sbagliati="+totSbaglaiti);
+        System.out.println(errori);
 
     }
 
+    /*
     private static ArrayList<Integer> check(ArrayList<String> tag, ArrayList<String> result, ArrayList<String> frase) {
         int corretti = 0;
         int sbagliati = 0;
@@ -83,10 +107,13 @@ public class Main {
                 //System.out.println("sbagliato= "+frase.get(i)+ " - "+ tag.get(i) + " - "+ result.get(i));
             }
         }
+
         System.out.println("corretti= "+corretti+" - sbagliati= "+sbagliati);
         ris.add(corretti);
         ris.add(sbagliati);
         return ris;
 
     }
+
+     */
 }

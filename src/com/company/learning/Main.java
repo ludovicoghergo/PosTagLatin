@@ -10,7 +10,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         ArrayList<Triple> list = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("/home/ludov/Documents/PosTagLatin/src/com/company/corpus/la_llct-ud-dev.conllu"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("/home/ludov/Documents/PosTagLatin/src/com/company/corpus/la_llct-ud-train.conllu"))) {
             String line;
             Triple triple2 = new Triple("inizioFrase","inizioFrase","inizioFrase");
             list.add(triple2);
@@ -34,6 +34,35 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // PROVA LUDO
+        ArrayList<Triple> list_dev = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader("/home/ludov/Documents/PosTagLatin/src/com/company/corpus/la_llct-ud-dev.conllu"))) {
+            String line;
+            Triple triple2 = new Triple("inizioFrase","inizioFrase","inizioFrase");
+            list_dev.add(triple2);
+            while ((line = br.readLine()) != null) {
+                if(line.length()!=0){
+                    if (line.charAt(0)!='#'){
+                        Triple triple;
+                        String[] tagger = line.split("\t");
+                        triple = new Triple(tagger[1],tagger[2],tagger[3]);
+                        list_dev.add(triple);
+                    }
+                }else{
+                    Triple triple = new Triple("fineFrase","fineFrase","fineFrase");
+                    Triple triple23 = new Triple("inizioFrase","inizioFrase","inizioFrase");
+                    list_dev.add(triple);
+                    list_dev.add(triple23);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //
 
 
         HashMap<String, HashMap<String, Integer>> numeratore = new HashMap<>();
@@ -81,13 +110,21 @@ public class Main {
         //PROVA LUDO
 
 
-        // calcolo probabilità pos-->pos
         HashMap<String, HashMap<String, Integer>> suffix_tag_map = new HashMap<>();
         HashMap <String, Integer> suffix_cnt = new HashMap<>();
+        HashMap <String, Integer> tag_cnt = new HashMap<>();
         String precTag2 = "inizioFrase";
 
-        for(Triple triple: list) {
-            //calcolo denominatore
+        for(Triple triple: list_dev) {
+
+            if(tag_cnt.keySet().contains(triple.getTag())){
+                Integer appoggio = tag_cnt.get(triple.getTag());
+                tag_cnt.remove(triple.getTag());
+                tag_cnt.put(triple.getTag(), appoggio+1);
+            }else{
+                tag_cnt.put(triple.getTag(), 1);
+            }
+
             if (!triple.tag.equals("inizioFrase") && !triple.tag.equals("fineFrase")) {
                 var word = triple.getWord();
                 int j = 0;
@@ -126,8 +163,15 @@ public class Main {
             }
         }
 
-        FileWriter f0 = new FileWriter("suff_tag.txt");
+        FileWriter f_new = new FileWriter("tag_freq.txt");
         String newLine = System.getProperty("line.separator");
+        for(String key: tag_cnt.keySet())
+        {
+                f_new.write(key + "\t" + tag_cnt.get(key) + newLine);
+        }
+        f_new.close();
+
+        FileWriter f0 = new FileWriter("suff_tag.txt");
         for(String key: suffix_tag_map.keySet())
         {
             for (String key_val: suffix_tag_map.get(key).keySet()){
@@ -142,7 +186,7 @@ public class Main {
         {
                 f_print.write(key + "\t" +suffix_cnt.get(key) + newLine);
         }
-        f0.close();
+        f_print.close();
 
 
 
